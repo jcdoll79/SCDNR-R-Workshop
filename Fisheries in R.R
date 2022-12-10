@@ -1,3 +1,5 @@
+#R code built around Introductory Fisheries Analysis with R
+#Ogle, D.H. 2016. Introductory Fisheries Analyses with R. Chapman & Hall/CRC, Boca Raton, FL.
 
 ################################################
 ########Day 2: Fisheries Analysis in R##########
@@ -13,7 +15,7 @@
 #   Individual growth
 #   Recruitment
 #   Population Estimates
-
+#########################################
 
 #Load packages for today
 library(FSA)
@@ -164,6 +166,7 @@ ggplot(LMBassBL, aes(x = tl)) +
   xlab("Frequency")
 ###End Answer###########
 
+
 ###PSD####
 #FSA contains a list of Gabelhouse (1984) 
 #length categories
@@ -216,15 +219,17 @@ psdCalc(~tl, data=LMB_SS,
 Chinook <- FSA::ChinookArg
 
 #Plot TL vs TW on the natural log scale
-plot(log(w) ~ log(tl), 
-     data=ChinookArg,xlab="log Total Length (mm)",
-     ylab="log Weight (g)",main="")
+ggplot(ChinookArg, aes(x = log(tl), y = log(w))) +
+  geom_point() +
+  xlab("ln(total Length) (mm)") + 
+  ylab("ln(total Weight) (g)")
+
 
 #Estimate parameters of the weight-length model 
 #using lm()
 lm1 <- lm(log(w) ~ log(tl), data=ChinookArg)
 
-#extract summary information and send to a new object
+#Extract summary information and send to a new object
 sumlw <- summary(lm1)
 sumlw
 
@@ -235,6 +240,7 @@ coeflw
 #Extract confidence intervals for coefficients
 confinlw <- confint(lm1)
 confinlw
+
 
 #Condition factors#######
 #Load Bluegill data from the FSA package
@@ -322,8 +328,7 @@ headtail(BLGSub)
 
 
 #Mortality#######
-#This example will calculate total mortality 
-#instantaneous mortality (Z)
+#This example will calculate instantaneous total mortality (Z)
 
 #Create a data frame for say, Brook Trout
 bkt <- data.frame(age=1:7,
@@ -332,7 +337,10 @@ bkt
 
 #Create a quick scatterplot with log(ct) to 
 #identify the descending limb of the catch curve
-plot(log(ct) ~ age, data = bkt)
+ggplot(bkt, aes(x = age, y = log(ct))) +
+  geom_point() +
+  xlab("Age (years)") + 
+  ylab("ln(count)")
 
 #The catchCurve() function requires
 #1. Formula in the form of catch ~ age
@@ -344,7 +352,7 @@ plot(log(ct) ~ age, data = bkt)
 bktcc <- catchCurve(ct ~ age, data = bkt, ages2use=2:7)
 
 #The summary function will return
-#the Instantaneous mortality (Z)
+#the instantaneous mortality (Z)
 #and annual mortality (A)
 summary(bktcc)
 
@@ -361,7 +369,10 @@ lmbcatch <- data.frame(age=1:8,
           ct=c(102, 325, 230, 150, 99, 45, 12, 6))
 
 ###Answer########
-plot(log(ct) ~ age, data = lmbcatch)
+ggplot(lmbcatch, aes(x = age, y = log(ct))) +
+  geom_point() +
+  xlab("Age (years)") + 
+  ylab("ln(count)")
 lmbcc <- catchCurve(ct ~ age, data = lmbcatch, 
                     ages2use=2:8)
 summary(lmbcc)
@@ -382,10 +393,10 @@ crm <- subset(Croaker2, sex=="M")
 
 
 #plot the data to visualize trends
-plot(tl ~ age, data=crm, 
-     ylab="Total Length (mm)", 
-     pch=19)
-
+ggplot(crm, aes(x = age, y = tl)) +
+  geom_point() +
+  xlab("Age (years)") + 
+  ylab("Total Length (mm)")
 
 #Select the von Bertalanffy Growth model to use
 #typical will use the traditional LVB model
@@ -414,8 +425,9 @@ coefCroaker
 confinCroaker <- confint2(fitCroaker)
 confinCroaker
 
-#Common error
+#Common error during parameter estimation
 #number of iterations exceeded maximum of 50
+
 #Occurs if algorithm has trouble finding 
 #coefficients for the model
 #Try increasing the algorithm
@@ -426,39 +438,13 @@ fitCroaker <- nls(tl ~ vbT(age, Linf ,K, t0),
                                  type="typical"),
                   control=list(maxiter=1000))
 
+summary(fitCroaker, correlation = TRUE)
 
-
-###LVB Practice####
-#Determine LVB growth parameters using the Bonito 
-#data set in the FSAdata package
-#All sexes combined
-#Note, check column headers for variable names
-
-
-###Answer##########
-Bonito <- FSAdata::Bonito
-plot(fl ~ age, data=Bonito, 
-     ylab="Total Length (mm)", 
-     pch=19)
-vbT <- vbFuns("typical", simple=FALSE)
-fitBonito <- nls(fl ~ vbT(age, Linf ,K, t0),
-                 data=Bonito,
-                 start=vbStarts(fl ~ age, 
-                                data = Bonito, 
-                                type="typical"))
-
-sumBonito <- summary(fitBonito, correlation = TRUE)
-sumBonito
-coefBonito <- coef(fitBonito)
-coefBonito
-confinT <- confint2(fitBonito)
-confinT
-###End Answer########
 
 
 #Stock-Recruitment#######
 
-#Lost stock and recruitment data for Klamath River
+#Stock and recruitment data for Klamath River
 #Chinook salmon, 1979-2000
 ChinookSR <- FSAdata::ChinookKR
 #Remove incomplete records
@@ -501,7 +487,7 @@ x <- seq(from=min(ChinookSR$spawners),
          by= 10000)
 
 #Predict recruitment from model fit above
-pR<-( rckr(x, a=coef(srR)))
+pR<- rckr(x, a=coef(srR))
 #combine in a data frame
 CombSR <- data.frame(x = x, pR = pR)
 

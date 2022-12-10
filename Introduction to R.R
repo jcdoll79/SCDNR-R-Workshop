@@ -1,4 +1,3 @@
-
 ##########################################
 ########Day 1: Introduction to R##########
 ##########################################
@@ -17,18 +16,19 @@
 #   Getting Help
 #   Manipulating data in R
 #   Plots
+##########################################
+
 
 #Comments#################################
 
-#So, just how do you add comments? 
-#Comments are made by using the hash tag, #, 
-#character in front of the text. 
+#Just how do you add comments? 
+#Comments are made by using the hash tag, #, character in front of the text. 
 #The hash tag ONLY comments the single line.
 
-#This is a comment line and will not be 
-#executed by R.
-#Comments are useful to describe what you 
-#are trying to do
+#This is a comment line and will not be executed by R.
+#Comments are useful to describe what you are trying to do
+
+
 
 #Operators###############################
 
@@ -144,6 +144,9 @@ lmb_byrow <- matrix(c(12,16,25,33,
                     byrow = TRUE)  #fill in the matrix by ROW
 
 lmb_byrow #print the matrix in the console
+
+#Return the dimensions of the lmb_byrow matrix
+dim(lmb_byrow)
 
 #Elements of a matrix are accessed by specifying 
 #the row then column in brackets. To access 
@@ -307,7 +310,7 @@ library(matrixStats)
 
 
 #Coding Tips#####################################################
-#See PDF
+#See Handout
 
 
 #Getting Help###################################################
@@ -369,15 +372,15 @@ lmb_df
 #             names_to = the  name of the new column with groups,
 #             values_to = the name of the new column that holds the values)
 
-lmb_df %>% pivot_longer(cols=c('X2018','X2019','X2020','X2021'),
-                        names_to='year',
-                        values_to='cpue')
+lmb_df %>% pivot_longer(cols = c("X2018", "X2019", "X2020", "X2021"),
+                        names_to = "year",
+                        values_to = "cpue")
 
 
 #Now create a new data frame with the "long" data format
-lmb_long <- lmb_df %>% pivot_longer(cols=c('X2018','X2019','X2020','X2021'),
-                        names_to='year',
-                        values_to='cpue')
+lmb_long <- lmb_df %>% pivot_longer(cols = c("X2018", "X2019", "X2020", "X2021"),
+                                    names_to = "year",
+                                    values_to = "cpue")
 
 
 
