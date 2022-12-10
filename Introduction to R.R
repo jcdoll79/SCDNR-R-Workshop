@@ -71,6 +71,9 @@ y
 #Determine the data type of object y
 class(y)
 
+#Using numeric variables 
+#subtract y from x
+x-y
 
 #Character
 #Assign the character string "Goodson Pond" 
