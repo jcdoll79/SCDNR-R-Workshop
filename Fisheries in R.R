@@ -13,7 +13,7 @@
 #   Condition factors
 #   Mortality
 #   Individual growth
-#   Recruitment
+#   Stock-Recruitment
 #   Population Estimates
 #########################################
 
@@ -27,25 +27,29 @@ library(dplyr)
 
 #Age-length keys#######
 
-#Load a bass data set from Florida
-#includes an upper case "O" not zero
+#Load a bass data set from Florida, name includes an upper case "O" not zero
 RockBassLO2 <- FSAdata::RockBassLO2
 
 #Add length intervals
-#Requires the data frame name, column with lengths, a numeric value 
+#Requires column with lengths, the data frame name, a numeric value 
 #identifying the starting length measurement and the width of the length 
 #measurement category
 RockBassLO2 <- lencat(~tl,data=RockBassLO2,
                       startcat=110,w=10)
 
 #Data contains missing age values, NA. We want to assign ages based on the ALK. 
+
 #First create an "age" data frame with all complete records
-rb.age <- subset(RockBassLO2, !is.na(age))
+rb.age <- RockBassLO2 %>%
+          dplyr::filter( !is.na(age) )
+
 head(rb.age)
 
 #then create a "length" data frame with records with missing ages.
 #Note the only difference from above is the !
-rb.len <- subset(RockBassLO2, is.na(age))
+rb.len <- RockBassLO2 %>%
+          dplyr::filter( is.na(age) )
+
 head(rb.len)
 
 #Construct the age-length key
@@ -75,21 +79,19 @@ alkPlot(rb.key, type = "bubble",
 
 #now we are ready to assign ages to individuals without ages. This example 
 #uses a semi-random method of assigning ages to individuals
-#Suppose there are 20 fish in a length category and
-#the age-length key says that 75% in the length 
-#category are age-6 and 25% are age-7. 
+#Suppose there are 20 fish in a length category that need assigned an age and
+#the age-length key says that 75% in the length category are age-6 and 25% are age-7. 
 #The age assignment for age-6 is (0.75 * 20) = 15
 #The age assignment for age-7 is (0.25 * 20) = 5
 
-#What are the fractional assignments for 22 fish?
+#What about the fractional assignments for 22 fish?
 #(0.75 * 22) = 16.5
 #(0.25 * 22) = 5.5
-#FSA rounds down and 16 fish are assigned age-6 and 
-#5 fish are assigned age-7.
-#What to do with the remaining fish?
+#FSA rounds down so that 16 fish are assigned age-6 and 5 fish are assigned age-7.
+
 #The remaining fish is assigned to age-6 with a 
-#probability of 0.75 or age-7 with a probability 
-#of 0.25
+#probability of 0.75 or age-7 with a probability of 0.25
+
 rb.len1 <- alkIndivAge(rb.key, age ~ tl, 
                        data = rb.len, 
                        type = c("SR"))
@@ -105,15 +107,18 @@ Summarize(tl~age,data=rb.combined,digits=2)
 af <- xtabs(~age,data=rb.combined)
 # proportional age distribution
 ap <- prop.table(af)
+ap
 
 
 #Calculate mean length-at-age following Bettoli and Miranda 2001. 
-#Used when fish are aged through a stratified designed get number of 
+#Used when fish are aged with a stratified design to get number of 
 #fish in each length interval in the entire sample.
+
+#Generate number per length class
 len.n <- xtabs(~LCat,data=RockBassLO2)
 
 #Calculate mean length at age and SD
-alkMeanVar(rb.key,tl ~ LCat + age, 
+alkMeanVar(rb.key, tl ~ LCat + age, 
            data = rb.age, 
            len.n = len.n)
 
@@ -148,22 +153,21 @@ LMBPer10
 #A histogram can be useful to visualize 
 #length frequencies
 ggplot(LMBassBL, aes(x = tl)) + 
-  geom_histogram(breaks = seq(from = 70 , to = 390, 
-                              by = 10),
+  geom_histogram(breaks = seq(from = 70 , to = 390, by = 10),
                  fill = "orange", color = "black")
 
 
 ###Histogram practice#############
-#Add "Total Length (mm)" to the y-axis label
-#Add "Frequency" to the x-axis label
+#Add "Total Length (mm)" to the x-axis label
+#Add "Frequency" to the y-axis label
 
 ###Answer################
 ggplot(LMBassBL, aes(x = tl)) + 
   geom_histogram(breaks = seq(from = 70 , to = 390, 
                               by = 10),
                  fill = "orange", color = "black") +
-  ylab("Total Length (mm)") +
-  xlab("Frequency")
+  xlab("Total Length (mm)") +
+  ylab("Frequency")
 ###End Answer###########
 
 
@@ -177,22 +181,21 @@ psdVal()
 
 
 #The units returned are in mm but you can request 
-#cm or in
+#cm, mm, or in
 psdVal("Largemouth Bass", units = "cm")
+psdVal("Largemouth Bass", units = "mm")
 psdVal("Largemouth Bass", units = "in")
 
-#Assign length category to each fish to the 
-#Largemouth Bass data frame
+#Assign length category to each fish to the Largemouth Bass data frame
+
 #Load the LMBassBL data set
 LMBassBL  <- FSAdata::LMBassBL 
 
 #First we need to pull out the Largemouth Bass 
 #length categories
-lmb.cuts <- psdVal("Largemouth Bass")
+lmb.cuts <- psdVal("Largemouth Bass", units = "mm")
 
-#Filter based on tl greater then stock length.
-#This eliminates fish less than stock length
-#and add the length category column
+#Filter based on tl greater then stock length and add the length category column
 LMB_SS <- LMBassBL  %>%
   filter( tl >= lmb.cuts["stock"]) %>%
   mutate( gcat = lencat(tl, breaks = lmb.cuts,
@@ -203,16 +206,15 @@ headtail(LMB_SS)
 #Calculate a frequency table across size groups
 xtabs(~gcat, data = LMB_SS)
 
-#Calculate all PSD-X values and 95% Confidence 
-#Intervals. Requires length column, data set, 
-#species, and what type. Types available are 
-#incremental (e.g., Stock to Quality) or
+#Calculate all PSD-X values and 95% Confidence Intervals. Requires length column, data set, 
+#species, and what type. Types available are incremental (e.g., Stock to Quality) or
 #traditional (e.g., Quality, Preferred, Memorable)
 psdCalc(~tl, data=LMB_SS, 
         species = "Largemouth Bass", 
         what = "traditional")
 
 
+#Break?
 
 #Weight-length relationships#######
 #Load Chinook data from the FSA package
@@ -242,6 +244,11 @@ confinlw <- confint(lm1)
 confinlw
 
 
+#Exercise 3
+
+#Lunch?
+
+
 #Condition factors#######
 #Load Bluegill data from the FSA package
 BLG <- FSAdata::BluegillLM  
@@ -264,16 +271,15 @@ BLGSub <- BLGSub %>%
 
 headtail(BLGSub)
 
+
 #Weight-Length Residuals
 #Estimate coefficients of weight-length model
 lm1 <- lm(logW ~ logL, data = BLGSub)
 coef(lm1)
 
 #Calculate weight residuals
-#Weight residuals are the difference between the 
-#observed log10 weight and predicted log10 weight
-#Residuals can tell you if the fish is plumper or
-#skinnier than average.
+#Weight residuals are the difference between the observed log10 weight and predicted log10 weight
+#Residuals can tell you if the fish is plumper or skinnier than average.
 
 BLGSub <- BLGSub %>%
   mutate(lwresid = residuals(lm1))
@@ -285,21 +291,12 @@ ggplot(BLGSub, aes(x = seq(1,nrow(BLGSub)), y = lwresid)) +
   geom_point() +
   geom_hline(yintercept=0)
 
-#Relative condition factor
-#Kn = W / mean(W @ L)
-
-BLGSub <- BLGSub %>%
-  mutate(predW = 10^fitted(lm1), Kn = wght / predW)
-
-headtail(BLGSub)
-
 
 #Relative Weight
 #Wr = W / Ws * 100 (where Ws is the standard weight given length)
 #Ws = 10 ^ (alpha + beta * log10(TL))
 
-#FSA contains a list of standard weights from a 
-#variety of sources
+#FSA contains a list of standard weights from a variety of sources
 #Return list of available species
 wsVal()
 
@@ -315,12 +312,12 @@ wsBlg <- wsVal("Bluegill", units=c("metric"),
 
 #How to reference the intercept and slope
 wsBlg
-wsBlg[["int"]]
-wsBlg[["slope"]]
+wsBlg$int
+wsBlg$slope
 
 #Add Ws and Wr column
 BLGSub <- BLGSub %>%
-  mutate(Ws = 10 ^(wsBlg[["int"]] + wsBlg[["slope"]] * logL ),
+  mutate(Ws = 10 ^(wsBlg$int + wsBlg$slope * logL ),
          Wr = wght/Ws * 100)
 
 headtail(BLGSub)
@@ -344,10 +341,8 @@ ggplot(bkt, aes(x = age, y = log(ct))) +
 
 #The catchCurve() function requires
 #1. Formula in the form of catch ~ age
-#2. A data argument, does not have to contain only 
-#the descending limb.
-#3. A required age2use argument that specifies 
-#the ages to use
+#2. A data argument, does not have to contain only the descending limb.
+#3. A required age2use argument that specifies the ages to use
 
 bktcc <- catchCurve(ct ~ age, data = bkt, ages2use=2:7)
 
@@ -401,7 +396,7 @@ ggplot(crm, aes(x = age, y = tl)) +
 #Select the von Bertalanffy Growth model to use
 #typical will use the traditional LVB model
 # Linf * (1 - exp(-K * (t - t0)))
-vbT <- vbFuns("typical", simple=FALSE)
+vbT <- vbFuns("typical")
 
 
 #Use the non-linear least squares algorithm to 
@@ -425,12 +420,10 @@ coefCroaker
 confinCroaker <- confint2(fitCroaker)
 confinCroaker
 
-#Common error during parameter estimation
-#number of iterations exceeded maximum of 50
+#Common error during parameter estimation, number of iterations exceeded maximum of 50
 
-#Occurs if algorithm has trouble finding 
-#coefficients for the model
-#Try increasing the algorithm
+#Occurs if algorithm has trouble finding coefficients for the model
+#Try increasing the algorithms maximum number of iterations
 fitCroaker <- nls(tl ~ vbT(age, Linf ,K, t0),
                   data=crm,
                   start=vbStarts(tl ~ age, 
@@ -441,6 +434,7 @@ fitCroaker <- nls(tl ~ vbT(age, Linf ,K, t0),
 summary(fitCroaker, correlation = TRUE)
 
 
+#Break?
 
 #Stock-Recruitment#######
 
@@ -460,8 +454,7 @@ ggplot(ChinookSR, aes(x = spawners, y = recruits)) +
 #Ricker function
 #E[R|S] = alpha * S * exp(-beta * S)
 
-#We will use the nls function to fit this 
-#non-linear model
+#We will use the nls function to fit this non-linear model
 #Requires starting values
 svR <- srStarts(recruits ~ spawners, 
                 data = ChinookSR, 
@@ -505,7 +498,7 @@ ggplot() +
 #Population Estimates from Depletion Data#######
 
 #Leslie Method
-#C_i/f_i = qN0 - qK_i-1
+#C_i/f_i = qN0 - q(K_i-1)
 
 #C_i=catch for sample i
 #f_i=fishing effort for sample i
@@ -518,7 +511,7 @@ ggplot() +
 #Build a data frame with capture data
 depdat <- data.frame(catch = c(7,7,4,1,2,1),
                      effort = c(10,10,10,10,6,10)) %>%
-  mutate(cpe = catch/effort, K = pcumsum(catch))
+          mutate(cpe = catch/effort, K = pcumsum(catch))
 
 #Plot catch data
 ggplot(depdat, aes(x = seq(1,nrow(depdat)), y = catch)) +
@@ -538,12 +531,10 @@ lm2 <- lm(cpe ~ K, data=depdat)
 (N0_hat <- cf1[["(Intercept)"]] / q_hat)
 
 
-#k-pass removal estimates require equal catchability 
-#and equal effort:
+#k-pass removal estimates require equal catchability and equal effort:
 #removal(catch, method)
 #Carle Strub (default) weighted k-pass estimator
-#Burnham is a likelihood based estimator used in 
-#Microfish software (Van Deventer 1989)
+#Burnham is a likelihood based estimator used in Microfish software (Van Deventer 1989)
 catch <- c(187, 77, 35, 5)
 pr1 <- removal(catch, method = "CarleStrub")
 
@@ -551,16 +542,16 @@ pr1 <- removal(catch, method = "CarleStrub")
 cbind(summary(pr1), confint(pr1))
 
 #The previous example can be applied to a single site.
-#Multiple sites can be estimated by using the 
-#streamlined code below
+#Multiple sites can be estimated by using the streamlined code below
 
 #Data from three sites
 catch2 <- data.frame(sta = c("SC10","SC11","SC12"),
                      p1 = c(19,75,20),    #Pass 1
                      p2 = c(14,19,11),    #Pass 2
                      p3 = c(9,5,3) )      #Pass 3
+catch2
 
-#Use the apply function
+#Use the apply function to generate population estimate at all sites
 #apply(array or matrix, Margin, function, 
 #      and just.est)
 #MARGIN = 1 indicates function is applied over rows
@@ -572,4 +563,6 @@ res <- apply(catch2[,-1],
              just.est=TRUE)
 
 (res <- data.frame(sta=catch2$sta, t(res) ) )
+
+#Exercise 4
 

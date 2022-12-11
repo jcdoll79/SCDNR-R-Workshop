@@ -1,17 +1,17 @@
 #Exercise 4 Answer Key
+library(FSA)
+library(dplyr)
+library(ggplot2)
+library(nlstools)
 
 #1.	Calculate standard weight and relative weight of Cisco using the “CiscoTL” 
-#data set in the FSAdata package. Add these two columns to the data frame.
+#data set in the FSAdata package. Add these two columns to the CiscoTL data frame.
+#Load the “CiscoTL” data set using:
 CiscoTL <- FSAdata::CiscoTL
 
 #Return a simplified object for calculation
 wsCIS <- wsVal("Cisco", units=c("metric"), 
                simplify = TRUE)
-
-#How to reference the intercept and slope
-wsCIS
-wsCIS[["int"]]
-wsCIS[["slope"]]
 
 #Add Ws and Wr column
 CiscoTL <- CiscoTL %>%
@@ -24,14 +24,15 @@ CiscoTL <- CiscoTL %>%
 #returned for relative weights.
 
 
-#2.	Use the following data to determine instantaneous total mortality (Z)
+#2.	Use the following data to create a scatterplot of count (y-axis) vs 
+#age (x-axis) and determine instantaneous total mortality (Z)
 
 #Create a data frame for say, Brook Trout
 bkt <- data.frame(age=1:8,
                   ct=c(74,210,165,92,82,50,25,10))
 bkt
 
-#Create a quick scatterplot with log(ct) to 
+#Create a scatterplot with log(ct) to 
 #identify the descending limb of the catch curve
 ggplot(bkt, aes(x = age, y = log(ct))) +
   geom_point() +

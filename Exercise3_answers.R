@@ -1,5 +1,8 @@
 #Exercise 3 Answer Key
-
+library(FSA)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
 
 #1.	Generate a vector of percentage of fish in 10mm length intervals using the 
 #“BluegillLM” data set from the FSAdata package.
@@ -24,14 +27,14 @@ BLGPer10 <- round( prop.table(BLGFreq10) * 100 , 1)
 #print proportion table
 BLGPer10
 
+
 #2.	Create a length frequency histogram of total length (tl column) using the “BluegillLM” 
 #data set from the FSAdata package.
 
 #A histogram can be useful to visualize 
 #length frequencies
 ggplot(BluegillLM, aes(x = tl)) + 
-  geom_histogram(breaks = seq(from = 50 , to = 230, 
-                              by = 10),
+  geom_histogram(breaks = seq(from = 50 , to = 230, by = 10),
                  fill = "orange", color = "black")
 
 #3.	Create a frequency table of Bluegill PSD size groups using the “BluegillLM” 
@@ -62,7 +65,7 @@ xtabs(~gcat, data = BLG_SS)
 
 
 
-#4.	Calculate the PSD-Q, PSD-P, and PSD-M of Bluegill using the BluegillLM dataset 
+#4.	Calculate the PSD-Q and PSD-P of Bluegill using the BluegillLM dataset 
 #from the FSAdata package.
 
 #Calculate all PSD-X values and 95% Confidence 

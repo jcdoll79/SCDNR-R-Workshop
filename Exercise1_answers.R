@@ -28,10 +28,13 @@ dat1 <- matrix(c(266,	369,	452,	555,
                ncol = 4,      #number of columns
                byrow = TRUE)  #fill in the matrix by ROW
 
-#6.	 Return the second row in the “dat1” matrix created in number 5
+#6.	 Determine the dimensions of the “dat1” matrix using a function.
+dim(dat1)
+
+#7.	Return the second row in the “dat1” matrix created in number 5
 dat1[2,]
 
-#7.	Create a data frame names “Lake1” that has six row and two columns with the following data:
+#8.	Create a data frame names “Lake1” that has six row and two columns with the following data:
 #  Species	TL
 #   LMB	195
 #   LMB	210
@@ -44,6 +47,8 @@ Lake1 <- data.frame (Species = c("LMB", "LMB", "LMB", "LMB", "BLG", "BLG"),
                      TL = c(195, 210, 222, 168, 95, 125))
 
 
-#8.	Return the second column (total length column) of the “Lake1” data from two different ways.
+#9.	Return the second column (total length column) of the “Lake1” data from two different ways.
 Lake1[,2]      
 Lake1$TL
+
+#10. Install the Hmisc package.

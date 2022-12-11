@@ -1,5 +1,6 @@
 #Exercise 2 Answer Key
-
+library(tidyr)
+library(ggplot2)
 
 #1.	Load the “Iris data” using the following code
 data("iris")
@@ -17,14 +18,14 @@ iris_long <- iris %>% pivot_longer(cols = c("Sepal.Length", "Sepal.Width", "Peta
 
 unique(iris_long$Species)
 
-#4.	4.	Using the “iris_long” data frame, filter only Sepal Lengths that are greater than 5.0 and 
+#4.	Using the “iris_long” data frame, filter only Sepal Lengths that are greater than 5.0 and 
 #assign the results to a new data frame named “filtered_iris’
 filtered_iris <- iris_long %>%
                 dplyr::filter(measurement == "Sepal.Length" & length > 5.0)
 filtered_iris
 
 #5.	Using the "iris_long" data frame, select only the setosa species, group the data by measurement, 
-#calculate the mean length for each measurement, and sort by the mean length.
+#calculate the mean length for each measurement, and sort by the mean length for each measurement.
 
 iris_long %>%
   dplyr::filter(Species == "setosa") %>%
