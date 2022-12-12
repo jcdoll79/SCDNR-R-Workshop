@@ -40,6 +40,10 @@
 # / Division
 # ^ or ** exponential
 
+5+5
+#COMMENT
+45*2
+
 #Logical operators
 # > greater than
 # >= greater than or equal to
@@ -47,6 +51,8 @@
 # <= less than or equal to
 # == exactly equal to
 # != Not equal to
+5==5
+4!=5
 
 #Other operators
 # <- or = assignment operators
@@ -122,7 +128,7 @@ lmb <- c(12,35,66,10,11,8)
 
 #accessing elements within the lmb vector by specifying the index within 
 #brackets. The following line returns the catch rate at the third lake.
-lmb[3]
+lmb[8]
 
 #create a vector of character data
 char1 <- c("one","two","four","two","five","two")
@@ -201,6 +207,8 @@ lmb_df[,2]
 lmb_df$X2018
 
 
+lmb_df$X2018[2:4]
+
 #List
 
 #A list is a vector containing other objects. A list can contain multiple vectors, 
@@ -215,10 +223,10 @@ lmb_byrow <- matrix(c(12,16,25,33,
                       66,85,33,21,
                       10,10,25,10,
                       11,3,6,18,
-                      8,7,12,22),  
+                      8,7,12,22),
                     nrow = 6,
                     ncol = 4,
-                    byrow = TRUE) 
+                    byrow = TRUE)
 lmb_df <- data.frame("lake" = c("A","B","C","D","E","F"),
                      "2018" = c(12,35,66,10,11,8),
                      "2019" = c(16,40,85,10,3,7),
@@ -238,7 +246,8 @@ lmb_list[[2]]
 
 #Try to return the vector and data frame from the 
 #list on your own.
-
+lmb_list[[1]]
+lmb_list[[3]]
 
 #Break?
 
@@ -265,6 +274,7 @@ lmb_df
 #Now calculate the average catch across all lakes in a single
 #Determine the average catch in 2018
 mean(lmb_df[,2])
+
 #Or reference the column header
 mean(lmb_df$X2018)
 
@@ -275,7 +285,7 @@ rowMeans(lmb_df[2,2:5])
 
 #You can also save the output of a function into a 
 #new object
-Mean_2018 = mean(lmb_df[,2])
+Mean_2018 <- mean(lmb_df[,2])
 #Print the mean from 2018 in the console
 Mean_2018
 
@@ -284,7 +294,7 @@ Mean_2018
 #Packages#########################################################
 
 #Packages contain the functions you will use to manipulate and analyze data.
-#R comes pre-installedwith several important packages.You will eventually 
+#R comes pre-installed with several important packages.You will eventually 
 #need to install other packages for specific analysis.
 #The FSA package that we will use tomorrow does not come with R
 
@@ -338,12 +348,12 @@ library(tidyr)
 #pivot_longer() converts from wide to long
 #pivot_wider() converts from long to wide
 
-#Covert from wide to long
+#Convert from wide to long
 #Preview the data to refresh what we are looking at
 lmb_df
 
-#We will introduce the magical "pipe" %>% symbol here first. The %>% is a useful operator to chain multiple 
-#functions together. The basic syntax is: 
+#We will introduce the magical "pipe" %>% symbol here first. The %>% is a useful operator to 
+#chain multiple functions together. The basic syntax is: 
 #data %>% function
 
 #The object on the left of %>% becomes the first argument of the function to the right. The first argument of a 
@@ -351,14 +361,14 @@ lmb_df
 #output of one function is the input data for a new function:
 
 #  -------> -------> -------> -------> ------->
-#data %>% function1 %>% function 2 %>% function 3
+#data %>% function1 %>% function2 %>% function3
 
 #pivot_longer(cols = columns to pivot into longer,
 #             names_to = the  name of the new column with groups,
 #             values_to = the name of the new column that holds the values)
 
 #Trick to change column headers to numeric without the "X"
-names(lmb_df) = c("lake", 2018, 2019, 2020, 2021)
+names(lmb_df) <- c("lake", 2018, 2019, 2020, 2021)
 
 lmb_df %>% pivot_longer(cols = c("2018", "2019", "2020", "2021"),
                         names_to = "year",
@@ -404,20 +414,21 @@ help("BassFL")
 #data (which we'll do later).
 
 #What are the unique species?
-unique(BassFL$species)
+unique(BassFL$age)
 #what are the unique locations? Try on your own.
 
 
 #What are the minimum and maximum number caught across species, location, and year?
 range(BassFL$num)
 #What about the minimum and maximum age? Try on your own
-
-
+range(BassFL$age)
 
 
 #Next, we will demonstrate filter, sorting, summarizing, 
 #and adding new columns
 
+names(BassFL)
+head(BassFL)
 #Filter all records of Suwanee bass
 Suwanee <- BassFL %>% 
            dplyr::filter(species == "Suwanee")
@@ -436,7 +447,6 @@ Suwanee_4p
 #Using the code above as a template, modify to filter 
 #for all observations from SantaFe that captured more 
 #than 39 fish
-
 
 #Answer###############
 Suwanee_n40 <- BassFL %>%
@@ -464,7 +474,6 @@ BassFL %>%    #specify data set
   dplyr::group_by(species,loc) %>% #identify groups to summarize
   dplyr::summarise(Mean_age = mean (age, na.rm = TRUE))
   
-
 #Use what you have learned above to
 #1) filter for only Suwanee bass
 #2) group data by location
@@ -482,13 +491,14 @@ BassFL %>%
 #End Answer#######
 
 
-
 #Count the number of observations per species#########
 BassFL %>%
   dplyr::group_by(species) %>%
   dplyr::summarise(num_obs = dplyr::n())
 
-
+x<-rnorm(100,0,1)
+y<-6+(x*5)+rnorm(length(x),0,5)
+plot(y~x)
 
 #Basic graphing in R#########################
 #Base R graphs are helpful to quickly visualize data but they are not very aesthetically pleasing.
@@ -517,7 +527,7 @@ LMB_SantaFe <- BassFL %>%
 #ggplot(data, aes(x = x values, y = y values))
 
 #Produces a blank graph
-ggplot(LMB_SantaFe, aes(x = age, y = num)) 
+ggplot( LMB_SantaFe, aes(x = age, y = num) ) 
 
 #After declaring the data layer, you can add elements to build it using the "+" symbol
 #The geom_point function tells R to make a scatterplot of points using the specified data
@@ -526,7 +536,7 @@ ggplot(LMB_SantaFe, aes(x = age, y = num)) +
 
 #Change the point size and color
 ggplot(LMB_SantaFe, aes(x = age, y = num)) +
-  geom_point(shape = 8, size = 4, color = "darkgreen") 
+  geom_point(shape = 1, size = 10, color = "blue") 
 #Try different values for size, shape, and different 
 #colors.
 
@@ -535,6 +545,7 @@ ggplot(LMB_SantaFe, aes(x = age, y = num)) +
 #Histogram#######
 #Load the Bonito data set from the FSAdata package
 Bonito <- FSAdata::Bonito
+help(Bonito)
 
 #Allow ggplot to pick bin width
 ggplot(Bonito, aes(x = fl)) + 
@@ -542,13 +553,13 @@ ggplot(Bonito, aes(x = fl)) +
 
 #Adjust bin width
 ggplot(Bonito, aes(x=fl)) + 
-  geom_histogram(bins = 50)
+  geom_histogram(bins = 20)
 
 #Adjust the color of the bars
 #fill will change the fill color, color will change 
 #the bar borders
 ggplot(Bonito, aes(x=fl)) + 
-  geom_histogram(bins = 50, fill = "pink", color = "black")
+  geom_histogram(bins = 20, fill = "pink", color = "black")
 
 
 #Boxplot#############
@@ -577,9 +588,9 @@ ggplot(LMB_SantaFe, aes(x = age, y = num)) +
   geom_point(shape = 8, size = 4, color = "darkgreen") +
   xlab("Age (years)") + 
   ylab("Number") +
-  theme(axis.text.x = element_text(size = 20),
-        axis.text.y = element_text(size = 20),
-        axis.title.x = element_text(size = 24),
-        axis.title.y = element_text(size = 24))
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20))
 
 #Exercise 2
