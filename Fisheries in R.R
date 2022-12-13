@@ -26,6 +26,12 @@ library(dplyr)
 
 
 #Age-length keys#######
+#1. Add length intervals
+#2. Separate data into and "age" and "length" data frame
+#3. Create a frequency table
+#4. Create a proportions table
+#5. Apply age-length key to fish without an age
+#6. Summarize length at age.
 
 #Load a bass data set from Florida, name includes an upper case "O" not zero
 RockBassLO2 <- FSAdata::RockBassLO2
@@ -66,6 +72,14 @@ rb.raw
 #margin=2 tells R to calculate proportions by column
 rb.key <- prop.table(rb.raw,margin=1)
 rb.key
+
+
+######################################
+#Can construct age-length key in a single block of code
+rb.key <- xtabs(~LCat+age,data=rb.age) %>%
+          prop.table(margin=1)
+######################################
+
 
 #Visualizing Age-Length key
 alkPlot(rb.key, type = "area", showLegend = TRUE,
@@ -126,12 +140,14 @@ alkMeanVar(rb.key, tl ~ LCat + age,
 
 
 #Size structure#######
+#1. Length Frequency
+#2. PSD
 
 #Load Largemouth Bass data from the FSAdata package
 LMBassBL <- FSAdata::LMBassBL 
 
 #Add a length category column
-LMBassBL$lcat10 <- lencat(LMBassBL$tl,w=10)
+LMBassBL$lcat10 <- lencat(LMBassBL$tl , w=10)
 
 #Check data to confirm
 headtail(LMBassBL)
@@ -250,6 +266,10 @@ confinlw
 
 
 #Condition factors#######
+#1. Fulton's Condtion Factor
+#2. Weight-length residuals
+#3. Relative weight
+
 #Load Bluegill data from the FSA package
 BLG <- FSAdata::BluegillLM  
 #Select the data and calculate log10 of 
@@ -358,8 +378,8 @@ plot(bktcc)
 
 
 ###Mortality Practice#############
-#Calculate Z and A from the following data frame on 
-#your own
+#Create a catch curve of the data below.
+#Calculate Z and A from the following data frame
 lmbcatch <- data.frame(age=1:8,
           ct=c(102, 325, 230, 150, 99, 45, 12, 6))
 
@@ -378,6 +398,11 @@ plot(lmbcc)
 
 
 #LVB growth model#######
+#1. Select data
+#2. Specify the growth model
+#3. Specify starting values and estimate parameters
+#4. Summarize results
+
 #Code for fitting a von Bertalanffy Growth Model
 
 #Load Croaker2 data from the FSAdata package
@@ -394,7 +419,7 @@ ggplot(crm, aes(x = age, y = tl)) +
   ylab("Total Length (mm)")
 
 #Select the von Bertalanffy Growth model to use
-#typical will use the traditional LVB model
+#"typical" will use the traditional LVB model
 # Linf * (1 - exp(-K * (t - t0)))
 vbT <- vbFuns("typical")
 
@@ -436,7 +461,12 @@ summary(fitCroaker, correlation = TRUE)
 
 #Break?
 
+
 #Stock-Recruitment#######
+#1. Select data
+#2. Specify the growth model
+#3. Specify starting values and estimate parameters
+#4. Summarize results
 
 #Stock and recruitment data for Klamath River
 #Chinook salmon, 1979-2000
@@ -467,15 +497,16 @@ rckr <- srFuns("Ricker")
 #Fit Ricker function to stock and recruitment data
 srR <- nls(recruits ~ rckr(spawners,a,b), 
            data = ChinookSR, 
-           start=svR)
+           start = svR)
+
 summary(srR)
 
 #Coefficients with 95% Confidence Intervals
-cbind(estimates=coef(srR), confint(srR))
+cbind(estimates = coef(srR), confint(srR))
 
 #Visualize the model fit
 #Range of spawning stock
-x <- seq(from=min(ChinookSR$spawners), 
+x <- seq(from = min(ChinookSR$spawners), 
          to = max(ChinookSR$spawners), 
          by= 10000)
 
@@ -496,6 +527,9 @@ ggplot() +
 
 
 #Population Estimates from Depletion Data#######
+#1. Leslie Method
+#2. k-pass removal
+
 
 #Leslie Method
 #C_i/f_i = qN0 - q(K_i-1)
@@ -522,7 +556,7 @@ lm2 <- lm(cpe ~ K, data=depdat)
 (cf1 <- coef(lm2))
 
 #Calculate N0
-#C_i/f_i = qN0 - qK_i-1
+#C_i/f_i = qN0 - q(K_i-1)
 
 #recall intercept = qN0
 #q is also the slope
