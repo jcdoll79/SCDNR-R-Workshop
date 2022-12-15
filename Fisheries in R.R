@@ -42,7 +42,7 @@ RockBassLO2 <- FSAdata::RockBassLO2
 #measurement category
 RockBassLO2 <- lencat(~tl,data=RockBassLO2,
                       startcat=110,w=10)
-
+head(RockBassLO2)
 #Data contains missing age values, NA. We want to assign ages based on the ALK. 
 
 #First create an "age" data frame with all complete records
@@ -109,9 +109,14 @@ alkPlot(rb.key, type = "bubble",
 rb.len1 <- alkIndivAge(rb.key, age ~ tl, 
                        data = rb.len, 
                        type = c("SR"))
+head(rb.len)
+head(rb.len1)
 
 #Combine aged and unaged (but with new ages) samples
-rb.combined = rbind(rb.age, rb.len1)
+rb.combined <- rbind(rb.age, rb.len1)
+dim(rb.combined)
+dim(rb.age)
+dim(rb.len1)
 
 # Calculate mean length-at-age assuming fully 
 #random selection
@@ -183,7 +188,8 @@ ggplot(LMBassBL, aes(x = tl)) +
                               by = 10),
                  fill = "orange", color = "black") +
   xlab("Total Length (mm)") +
-  ylab("Frequency")
+  ylab("Frequency")+
+  theme( text = element_text(family="serif"))
 ###End Answer###########
 
 
@@ -206,6 +212,7 @@ psdVal("Largemouth Bass", units = "in")
 
 #Load the LMBassBL data set
 LMBassBL  <- FSAdata::LMBassBL 
+help(LMBassBL)
 
 #First we need to pull out the Largemouth Bass 
 #length categories
@@ -213,8 +220,8 @@ lmb.cuts <- psdVal("Largemouth Bass", units = "mm")
 
 #Filter based on tl greater then stock length and add the length category column
 LMB_SS <- LMBassBL  %>%
-  filter( tl >= lmb.cuts["stock"]) %>%
-  mutate( gcat = lencat(tl, breaks = lmb.cuts,
+  dplyr::filter( tl >= lmb.cuts["stock"]) %>%
+  dplyr::mutate( gcat = lencat(tl, breaks = lmb.cuts,
                         use.names = TRUE))
 
 headtail(LMB_SS)
@@ -234,7 +241,7 @@ psdCalc(~tl, data=LMB_SS,
 
 #Weight-length relationships#######
 #Load Chinook data from the FSA package
-Chinook <- FSA::ChinookArg
+ChinookArg <- FSA::ChinookArg
 
 #Plot TL vs TW on the natural log scale
 ggplot(ChinookArg, aes(x = log(tl), y = log(w))) +
@@ -266,12 +273,13 @@ confinlw
 
 
 #Condition factors#######
-#1. Fulton's Condtion Factor
+#1. Fulton's Condition Factor
 #2. Weight-length residuals
 #3. Relative weight
 
 #Load Bluegill data from the FSA package
 BLG <- FSAdata::BluegillLM  
+help(BluegillLM)
 #Select the data and calculate log10 of 
 #length and weight
 
@@ -296,7 +304,7 @@ headtail(BLGSub)
 #Estimate coefficients of weight-length model
 lm1 <- lm(logW ~ logL, data = BLGSub)
 coef(lm1)
-
+residuals(lm1)
 #Calculate weight residuals
 #Weight residuals are the difference between the observed log10 weight and predicted log10 weight
 #Residuals can tell you if the fish is plumper or skinnier than average.
@@ -307,7 +315,7 @@ BLGSub <- BLGSub %>%
 headtail(BLGSub)
 
 #Plot residuals
-ggplot(BLGSub, aes(x = seq(1,nrow(BLGSub)), y = lwresid)) +
+ggplot(BLGSub, aes(x = seq(from=1,to=nrow(BLGSub)), y = lwresid)) +
   geom_point() +
   geom_hline(yintercept=0)
 
@@ -324,10 +332,10 @@ wsVal()
 View(WSlit)
 
 #Return standard weight coefficients for one species
-wsVal("Bluegill", units = c("metric"))
+wsVal("Bluegill", units = "metric")
 
 #Return a simplified object for calculation
-wsBlg <- wsVal("Bluegill", units=c("metric"), 
+wsBlg <- wsVal("Bluegill", units="metric", 
                simplify = TRUE)
 
 #How to reference the intercept and slope
@@ -337,7 +345,7 @@ wsBlg$slope
 
 #Add Ws and Wr column
 BLGSub <- BLGSub %>%
-  mutate(Ws = 10 ^(wsBlg$int + wsBlg$slope * logL ),
+  mutate(Ws = 10 ^ (wsBlg$int + wsBlg$slope * logL ),
          Wr = wght/Ws * 100)
 
 headtail(BLGSub)
@@ -407,6 +415,8 @@ plot(lmbcc)
 
 #Load Croaker2 data from the FSAdata package
 Croaker2 <- FSAdata::Croaker2
+
+help("Croaker2")
 
 #Subset to only Males
 crm <- subset(Croaker2, sex=="M")
@@ -552,6 +562,7 @@ ggplot(depdat, aes(x = seq(1,nrow(depdat)), y = catch)) +
   geom_point()
 
 lm2 <- lm(cpe ~ K, data=depdat)
+summary(lm2)
 #extract coefficients
 (cf1 <- coef(lm2))
 
@@ -589,7 +600,7 @@ catch2
 #apply(array or matrix, Margin, function, 
 #      and just.est)
 #MARGIN = 1 indicates function is applied over rows
-#MARGIN = 1 indicates function is applied over columns
+#MARGIN = 2 indicates function is applied over columns
 #The data frame has one site for each row
 res <- apply(catch2[,-1], 
              MARGIN = 1, 
